@@ -34,7 +34,7 @@ if st.button("Enviar Pergunta"):
         with st.spinner("Aguarde enquanto sua pergunta está sendo processada..."):
             try:
                 # Chamada para a API FastAPI
-                response = requests.post("http://localhost:8000/ask", json=payload)
+                response = requests.post("https://us-central1-ock-test.cloudfunctions.net/ock-question", json=payload)
                 response_data = response.json()
                 
                 if response.status_code == 200:
