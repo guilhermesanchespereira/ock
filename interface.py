@@ -1,6 +1,13 @@
 import streamlit as st
 import requests
 
+# Inicializa as variáveis no session_state para manter os dados
+if 'response_result' not in st.session_state:
+    st.session_state['response_result'] = None
+
+if 'question_submitted' not in st.session_state:
+    st.session_state['question_submitted'] = False
+
 # Configurações da interface
 st.title("Opencashback IA com GPT/Gemini - Versão Beta 0.1")
 
@@ -18,12 +25,12 @@ account_name = st.selectbox("Nome do Contratante", options=contractors)
 # Seleção do modelo
 model_option = st.selectbox("Escolha o modelo", options=["GPT-4", "Gemini"])
 
-# Variável para armazenar a resposta gerada
-response_result = None
-
 # Botão para enviar os dados
 if st.button("Enviar Pergunta"):
     if message and account_name:
+        # Define que a pergunta foi enviada
+        st.session_state['question_submitted'] = True
+
         # Dados a serem enviados para a API
         payload = {
             "message": message,
@@ -40,8 +47,8 @@ if st.button("Enviar Pergunta"):
                 
                 if response.status_code == 200:
                     st.success("Consulta SQL gerada com sucesso!")
-                    response_result = response_data["result"]
-                    st.text_area("Resultado", value=response_result, height=300)
+                    st.session_state['response_result'] = response_data["result"]
+                    st.text_area("Resultado", value=st.session_state['response_result'], height=300)
                 else:
                     st.error(f"Erro: {response_data['detail']}")
             except Exception as e:
@@ -49,8 +56,8 @@ if st.button("Enviar Pergunta"):
     else:
         st.warning("Por favor, preencha todos os campos antes de enviar.")
 
-# Se uma resposta foi gerada, perguntar ao usuário se foi útil
-if response_result:
+# Verificar se a pergunta foi enviada e se uma resposta foi gerada
+if st.session_state['question_submitted'] and st.session_state['response_result']:
     st.write("Essa resposta foi útil?")
 
     col1, col2 = st.columns([1, 1])
@@ -61,12 +68,12 @@ if response_result:
             feedback_payload = {
                 "account_name": account_name,
                 "useful": True,  # Feedback de que foi útil
-                "response": response_result,
+                "response": st.session_state['response_result'],
                 "question": message,
                 "model": model_option
             }
             try:
-                feedback_response = requests.post("https://us-central1-ock-test.cloudfunctions.net/save-feedback", json=feedback_payload)
+                feedback_response = requests.post("https://us-central1-ock-test.cloudfunctions.net/save_feedback", json=feedback_payload)
                 if feedback_response.status_code == 200:
                     st.success("Obrigado pelo seu feedback!")
                 else:
@@ -80,12 +87,12 @@ if response_result:
             feedback_payload = {
                 "account_name": account_name,
                 "useful": False,  # Feedback de que não foi útil
-                "response": response_result,
+                "response": st.session_state['response_result'],
                 "question": message,
                 "model": model_option
             }
             try:
-                feedback_response = requests.post("https://us-central1-ock-test.cloudfunctions.net/save-feedback", json=feedback_payload)
+                feedback_response = requests.post("https://us-central1-ock-test.cloudfunctions.net/save_feedback", json=feedback_payload)
                 if feedback_response.status_code == 200:
                     st.success("Obrigado pelo seu feedback!")
                 else:
