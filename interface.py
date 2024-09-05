@@ -8,6 +8,9 @@ if 'response_result' not in st.session_state:
 if 'question_submitted' not in st.session_state:
     st.session_state['question_submitted'] = False
 
+if 'generated_query' not in st.session_state:
+    st.session_state['generated_query'] = None
+
 # Configurações da interface
 st.title("Opencashback IA com GPT/Gemini - Versão Beta 0.1")
 
@@ -48,6 +51,7 @@ if st.button("Enviar Pergunta"):
                 if response.status_code == 200:
                     st.success("Consulta SQL gerada com sucesso!")
                     st.session_state['response_result'] = response_data["result"]
+                    st.session_state['generated_query'] = response_data["query"]  # Armazena a query gerada
                     st.text_area("Resultado", value=st.session_state['response_result'], height=300)
                 else:
                     st.error(f"Erro: {response_data['detail']}")
@@ -70,7 +74,8 @@ if st.session_state['question_submitted'] and st.session_state['response_result'
                 "useful": True,  # Feedback de que foi útil
                 "response": st.session_state['response_result'],
                 "question": message,
-                "model": model_option
+                "model": model_option,
+                "query": st.session_state['generated_query']  # Inclui a query gerada
             }
             try:
                 feedback_response = requests.post("https://us-central1-ock-test.cloudfunctions.net/save_feedback", json=feedback_payload)
@@ -89,7 +94,8 @@ if st.session_state['question_submitted'] and st.session_state['response_result'
                 "useful": False,  # Feedback de que não foi útil
                 "response": st.session_state['response_result'],
                 "question": message,
-                "model": model_option
+                "model": model_option,
+                "query": st.session_state['generated_query']  # Inclui a query gerada
             }
             try:
                 feedback_response = requests.post("https://us-central1-ock-test.cloudfunctions.net/save_feedback", json=feedback_payload)
