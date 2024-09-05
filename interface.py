@@ -66,7 +66,7 @@ if response_result:
                 "model": model_option
             }
             try:
-                feedback_response = requests.post("https://us-central1-ock-test.cloudfunctions.net/ock-feedback", json=feedback_payload)
+                feedback_response = requests.post("https://us-central1-ock-test.cloudfunctions.net/save-feedback", json=feedback_payload)
                 if feedback_response.status_code == 200:
                     st.success("Obrigado pelo seu feedback!")
                 else:
@@ -85,7 +85,7 @@ if response_result:
                 "model": model_option
             }
             try:
-                feedback_response = requests.post("https://us-central1-ock-test.cloudfunctions.net/ock-feedback", json=feedback_payload)
+                feedback_response = requests.post("https://us-central1-ock-test.cloudfunctions.net/save-feedback", json=feedback_payload)
                 if feedback_response.status_code == 200:
                     st.success("Obrigado pelo seu feedback!")
                 else:
